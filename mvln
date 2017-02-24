@@ -1,0 +1,66 @@
+#!/bin/bash
+#################################################
+#
+# Verschiebt eine Datei und erstellt einen 
+# gleichnamigen Symbolischen link zum neuen 
+# Ort der Datei.
+#
+# Author: Frieder Rick: https://github.com/entfrickler
+#
+#################################################
+
+display_usage(){
+  echo "Move <file> to <directory> and create a symlink"
+  echo "in the place of <file> which links to <diretory>/<file>"
+  echo -e "\nUsage:\n$0 <file> <directory> \n" 
+
+}
+
+# check whether user had supplied -h or --help . If yes display usage 
+if [[ ( $# == "--help") ||  $# == "-h" ]] 
+then 
+  display_usage
+  exit 0
+fi 
+
+# if less than two arguments supplied, display usage 
+if [  $# -le 1 ] 
+then 
+  display_usage
+  exit 1
+fi 
+
+# if first argument is no file, display usage 
+if [ ! -e "$1" ]
+then
+  echo "File $1 doesn't exist\n"
+  display_usage
+  exit 1
+fi
+
+# if second argument is no directory, display usage 
+if [ ! -d "$2" ]
+then
+  echo "Directory $2 doesn't exist\n"
+  display_usage
+  exit 1
+fi
+
+# check if the dir we want to move to is absolute to get a correct link afterwards
+if [[ "$2" != /* ]]
+then
+    2="$(pwd)/${2}"
+fi
+
+
+# move file to dir
+mv "$1" "$2"
+if [ "$?" -ne "0" ] 
+then
+  echo "Some error"
+  exit 1
+fi
+
+# create link
+ln -s "${2%/}/${1##*/}" "${1%/*}"
+
